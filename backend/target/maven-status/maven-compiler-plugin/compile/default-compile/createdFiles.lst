@@ -1,0 +1,4 @@
+com/library/entity/BookCopy.class
+com/library/repository/BookCopyRepository.class
+com/library/entity/CopyStatus.class
+com/library/entity/LoanStatus.class
