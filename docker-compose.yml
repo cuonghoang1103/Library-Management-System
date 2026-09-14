@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: libproject-db
+    environment:
+      POSTGRES_DB: library_db
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - libproject_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d library_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: libproject-api
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/library_db
+      SPRING_DATASOURCE_USERNAME: library_user
+      SPRING_DATASOURCE_PASSWORD: library_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: libproject-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  libproject_postgres_data:

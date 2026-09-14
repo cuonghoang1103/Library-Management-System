@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Build
+target/
+build/
+*.classpath
+*.project
+*.settings/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+*.pid
+
+# Misc
+*.swp
+*.swo
+*~

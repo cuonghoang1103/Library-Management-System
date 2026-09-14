@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/library_db
+    username: library_user
+    password: library_pass
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: "0"
