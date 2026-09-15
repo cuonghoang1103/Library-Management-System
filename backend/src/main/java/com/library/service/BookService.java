@@ -40,7 +40,7 @@ public class BookService {
         if (query == null || query.trim().isEmpty()) {
             return bookRepository.findAll(pageable).map(this::toDTO);
         }
-        return bookRepository.fullTextSearch(query.trim(), pageable).map(this::toDTO);
+        return bookRepository.searchByKeyword(query.trim(), pageable).map(this::toDTO);
     }
     
     @Transactional
