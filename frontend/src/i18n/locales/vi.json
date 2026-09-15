@@ -34,7 +34,8 @@
     "info": "Thông tin",
     "noData": "Không có dữ liệu",
     "required": "Bắt buộc",
-    "optional": "Tùy chọn"
+    "optional": "Tùy chọn",
+    "page": "Trang"
   },
   "auth": {
     "login": "Đăng nhập",

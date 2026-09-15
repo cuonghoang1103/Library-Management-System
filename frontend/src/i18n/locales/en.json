@@ -34,7 +34,8 @@
     "info": "Info",
     "noData": "No data available",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "page": "Page"
   },
   "auth": {
     "login": "Login",
