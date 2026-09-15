@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { booksApi } from '../services/api';
 import { Search as SearchIcon, BookOpen, Filter, Grid, List, X, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import BookCover from '../components/BookCover';
 
 export default function Search() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -101,7 +103,7 @@ export default function Search() {
       setResults(applyFilters(books));
       setAllBooks(books);
     } catch (err) {
-      toast.error('Search failed');
+      toast.error(t('search.searchFailed'));
     } finally {
       setLoading(false);
     }
@@ -127,9 +129,9 @@ export default function Search() {
     <div className="p-4 md:p-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Search Books</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('search.pageTitle')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Find and borrow books from the library
+          {t('search.pageSubtitle')}
         </p>
       </div>
 
@@ -142,168 +144,168 @@ export default function Search() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by title, author, or keywords..."
+              placeholder={t('search.placeholder')}
               className="input pl-12 py-4 text-lg"
             />
           </div>
           <button type="submit" className="btn-primary py-4 px-8 text-lg">
-            Search
+            {t('common.search')}
           </button>
         </div>
 
-{/* Filters */}
-  <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-    <div className="flex items-center gap-2">
-      <Filter size={16} className="text-gray-400" />
-      <span className="text-sm text-gray-600 dark:text-gray-400">Filters:</span>
-    </div>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex items-center gap-2">
+          <Filter size={16} className="text-gray-400" />
+          <span className="text-sm text-gray-600 dark:text-gray-400">{t('search.filters')}:</span>
+        </div>
 
-    <select
-      value={genreFilter}
-      onChange={(e) => {
-        setGenreFilter(e.target.value);
-        if (hasSearched) setResults(applyFilters(allBooks));
-      }}
-      className="input w-auto"
-    >
-      <option value="">All Genres</option>
-      {genres.map(genre => (
-        <option key={genre} value={genre}>{genre}</option>
-      ))}
-    </select>
+        <select
+          value={genreFilter}
+          onChange={(e) => {
+            setGenreFilter(e.target.value);
+            if (hasSearched) setResults(applyFilters(allBooks));
+          }}
+          className="input w-auto"
+        >
+          <option value="">{t('search.allGenres')}</option>
+          {genres.map(genre => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
 
-    <select
-      value={languageFilter}
-      onChange={(e) => {
-        setLanguageFilter(e.target.value);
-        if (hasSearched) setResults(applyFilters(allBooks));
-      }}
-      className="input w-auto"
-    >
-      <option value="">All Languages</option>
-      {languages.map(lang => (
-        <option key={lang} value={lang}>{lang}</option>
-      ))}
-    </select>
+        <select
+          value={languageFilter}
+          onChange={(e) => {
+            setLanguageFilter(e.target.value);
+            if (hasSearched) setResults(applyFilters(allBooks));
+          }}
+          className="input w-auto"
+        >
+          <option value="">{t('search.allLanguages')}</option>
+          {languages.map(lang => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
 
-    <select
-      value={sortBy}
-      onChange={(e) => {
-        setSortBy(e.target.value);
-        if (hasSearched) setResults(applyFilters(allBooks));
-      }}
-      className="input w-auto"
-    >
-      <option value="relevance">Sort: Relevance</option>
-      <option value="title">Sort: Title A-Z</option>
-      <option value="author">Sort: Author A-Z</option>
-      <option value="year">Sort: Year (Newest)</option>
-      <option value="available">Sort: Availability</option>
-    </select>
+        <select
+          value={sortBy}
+          onChange={(e) => {
+            setSortBy(e.target.value);
+            if (hasSearched) setResults(applyFilters(allBooks));
+          }}
+          className="input w-auto"
+        >
+          <option value="relevance">{t('search.sortRelevance')}</option>
+          <option value="title">{t('search.sortTitle')}</option>
+          <option value="author">{t('search.sortAuthor')}</option>
+          <option value="year">{t('search.sortYear')}</option>
+          <option value="available">{t('search.sortAvailability')}</option>
+        </select>
 
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={availableOnly}
-        onChange={(e) => {
-          setAvailableOnly(e.target.checked);
-          if (hasSearched) setResults(applyFilters(allBooks));
-        }}
-        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-      />
-      <span className="text-sm text-gray-700 dark:text-gray-300">Available only</span>
-    </label>
-
-    {/* Advanced Filters Toggle */}
-    <button
-      type="button"
-      onClick={() => setShowAdvanced(!showAdvanced)}
-      className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
-    >
-      <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-      Advanced
-      {activeFiltersCount > 0 && (
-        <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{activeFiltersCount}</span>
-      )}
-    </button>
-
-    {activeFiltersCount > 0 && (
-      <button
-        type="button"
-        onClick={clearFilters}
-        className="text-sm text-red-600 hover:underline flex items-center gap-1"
-      >
-        <X size={14} /> Clear all
-      </button>
-    )}
-  </div>
-
-  {/* Advanced Filters Panel */}
-  {showAdvanced && (
-    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mt-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year From</label>
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
-            type="number"
-            value={yearFrom}
+            type="checkbox"
+            checked={availableOnly}
             onChange={(e) => {
-              setYearFrom(e.target.value);
+              setAvailableOnly(e.target.checked);
               if (hasSearched) setResults(applyFilters(allBooks));
             }}
-            placeholder="e.g., 2020"
-            className="input w-full"
-            min="1900"
-            max={new Date().getFullYear()}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year To</label>
-          <input
-            type="number"
-            value={yearTo}
-            onChange={(e) => {
-              setYearTo(e.target.value);
-              if (hasSearched) setResults(applyFilters(allBooks));
-            }}
-            placeholder="e.g., 2024"
-            className="input w-full"
-            min="1900"
-            max={new Date().getFullYear()}
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Minimum Rating</label>
-          <div className="flex gap-2 items-center">
-            {[0, 1, 2, 3, 4, 5].map((rating) => (
-              <button
-                key={rating}
-                type="button"
-                onClick={() => {
-                  setMinRating(rating);
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('search.availableOnly')}</span>
+        </label>
+
+        {/* Advanced Filters Toggle */}
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+        >
+          <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+          {t('search.advanced')}
+          {activeFiltersCount > 0 && (
+            <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{activeFiltersCount}</span>
+          )}
+        </button>
+
+        {activeFiltersCount > 0 && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-sm text-red-600 hover:underline flex items-center gap-1"
+          >
+            <X size={14} /> {t('search.clearAll')}
+          </button>
+        )}
+      </div>
+
+      {/* Advanced Filters Panel */}
+      {showAdvanced && (
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('search.yearFrom')}</label>
+              <input
+                type="number"
+                value={yearFrom}
+                onChange={(e) => {
+                  setYearFrom(e.target.value);
                   if (hasSearched) setResults(applyFilters(allBooks));
                 }}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  minRating === rating
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {rating === 0 ? 'Any' : `${rating}+`}
-              </button>
-            ))}
+                placeholder="e.g., 2020"
+                className="input w-full"
+                min="1900"
+                max={new Date().getFullYear()}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('search.yearTo')}</label>
+              <input
+                type="number"
+                value={yearTo}
+                onChange={(e) => {
+                  setYearTo(e.target.value);
+                  if (hasSearched) setResults(applyFilters(allBooks));
+                }}
+                placeholder="e.g., 2024"
+                className="input w-full"
+                min="1900"
+                max={new Date().getFullYear()}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('search.minRating')}</label>
+              <div className="flex gap-2 items-center">
+                {[0, 1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() => {
+                      setMinRating(rating);
+                      if (hasSearched) setResults(applyFilters(allBooks));
+                    }}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      minRating === rating
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {rating === 0 ? t('search.any') : `${rating}+`}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  )}
+      )}
       </form>
 
       {/* View Mode Toggle */}
       {hasSearched && results.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {results.length} result{results.length !== 1 ? 's' : ''} found
+            {results.length} {t('search.resultsFound')}
           </p>
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
@@ -347,11 +349,11 @@ export default function Search() {
                 />
                 {/* Availability Badge */}
                 <div className="absolute top-3 right-3">
-                  <span className={`badge ${
-                    book.availableCopies > 0 ? 'badge-success' : 'badge-danger'
-                  }`}>
-                    {book.availableCopies > 0 ? `${book.availableCopies} avail` : 'N/A'}
-                  </span>
+              <span className={`badge ${
+                book.availableCopies > 0 ? 'badge-success' : 'badge-danger'
+              }`}>
+                {book.availableCopies > 0 ? `${book.availableCopies} ${t('books.avail')}` : t('books.notAvailable')}
+              </span>
                 </div>
               </div>
 
@@ -373,9 +375,9 @@ export default function Search() {
                     </span>
                   )}
                 </div>
-                {book.pages && (
-                  <p className="text-xs text-gray-400 mt-2">{book.pages} pages</p>
-                )}
+            {book.pages && (
+              <p className="text-xs text-gray-400 mt-2">{book.pages} {t('books.pages')}</p>
+            )}
               </div>
             </Link>
           ))}
@@ -402,21 +404,21 @@ export default function Search() {
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">{book.author}</p>
                   </div>
-                  <span className={`badge ${
-                    book.availableCopies > 0 ? 'badge-success' : 'badge-danger'
-                  }`}>
-                    {book.availableCopies > 0 ? `${book.availableCopies} available` : 'Not available'}
-                  </span>
+              <span className={`badge ${
+                book.availableCopies > 0 ? 'badge-success' : 'badge-danger'
+              }`}>
+                {book.availableCopies > 0 ? `${book.availableCopies} ${t('books.available')}` : t('books.notAvailable')}
+              </span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
-                  {book.description || 'No description available'}
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {book.genre && <span className="badge badge-info">{book.genre}</span>}
-                  {book.isbn && <span className="text-xs text-gray-400">ISBN: {book.isbn}</span>}
-                  {book.publisher && <span className="text-xs text-gray-400">{book.publisher}</span>}
-                  {book.pages && <span className="text-xs text-gray-400">{book.pages} pages</span>}
-                </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+              {book.description || t('books.noDescription')}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {book.genre && <span className="badge badge-info">{book.genre}</span>}
+              {book.isbn && <span className="text-xs text-gray-400">{t('books.isbn')}: {book.isbn}</span>}
+              {book.publisher && <span className="text-xs text-gray-400">{book.publisher}</span>}
+              {book.pages && <span className="text-xs text-gray-400">{book.pages} {t('books.pages')}</span>}
+            </div>
               </div>
             </Link>
           ))}
@@ -430,17 +432,17 @@ export default function Search() {
             <BookOpen className="w-10 h-10 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No books found
+            {t('search.noResults')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            We couldn't find any books matching your search criteria. Try different keywords or browse all books.
+            {t('search.noResultsDescription')}
           </p>
           <div className="flex justify-center gap-3">
             <button onClick={clearFilters} className="btn-secondary">
-              Clear filters
+              {t('search.clearFilters')}
             </button>
             <button onClick={handleSearch} className="btn-primary">
-              Browse all books
+              {t('search.browseAll')}
             </button>
           </div>
         </div>
@@ -453,13 +455,13 @@ export default function Search() {
             <SearchIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Find your next read
+            {t('search.findNextRead')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            Search for books by title, author, or keywords. Or browse our entire collection.
+            {t('search.searchDescription')}
           </p>
           <button onClick={handleSearch} className="btn-primary">
-            Browse all books
+            {t('search.browseAll')}
           </button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usersApi } from '../services/api';
 import { Plus, Edit, Trash2, Users as UsersIcon, Search, Shield, User, Mail, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -17,6 +18,7 @@ const UserSkeleton = ({ index }) => (
 );
 
 export default function Users() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -72,7 +74,7 @@ export default function Users() {
       setTotalPages(res.data.data.totalPages || 0);
       setTotalElements(res.data.data.totalElements || 0);
     } catch (err) {
-      toast.error('Failed to load users');
+      toast.error(t('users.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -83,17 +85,17 @@ export default function Users() {
     try {
       if (editingUser) {
         await usersApi.update(editingUser.id, formData);
-        toast.success('User updated successfully');
+        toast.success(t('users.updateSuccess'));
       } else {
         await usersApi.create(formData);
-        toast.success('User created successfully');
+        toast.success(t('users.createSuccess'));
       }
       setShowModal(false);
       setEditingUser(null);
       resetForm();
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Operation failed');
+      toast.error(err.response?.data?.message || t('users.operationFailed'));
     }
   };
 
@@ -114,21 +116,21 @@ export default function Users() {
   const handleToggleStatus = async (id) => {
     try {
       await usersApi.toggleStatus(id);
-      toast.success('User status updated');
+      toast.success(t('users.statusUpdated'));
       fetchUsers();
     } catch (err) {
-      toast.error('Failed to update user status');
+      toast.error(t('users.updateStatusFailed'));
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    if (!confirm(t('users.confirmDelete'))) return;
     try {
       await usersApi.delete(id);
-      toast.success('User deleted successfully');
+      toast.success(t('users.deleteSuccess'));
       fetchUsers();
     } catch (err) {
-      toast.error('Failed to delete user');
+      toast.error(t('users.deleteFailed'));
     }
   };
 
@@ -149,9 +151,9 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Users</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('users.pageTitle')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {totalElements > 0 ? `${totalElements} users` : 'No users found'}
+            {totalElements > 0 ? `${totalElements} ${t('users.users')}` : t('users.noUsersFound')}
           </p>
         </div>
         <button
@@ -159,7 +161,7 @@ export default function Users() {
           className="btn-primary flex items-center gap-2"
         >
           <Plus size={20} />
-          Add User
+          {t('users.addUser')}
         </button>
       </div>
 
@@ -170,7 +172,7 @@ export default function Users() {
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by name, username, or email..."
+              placeholder={t('users.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
               className="input pl-10"
@@ -182,18 +184,18 @@ export default function Users() {
               onChange={(e) => { setRoleFilter(e.target.value); setPage(0); }}
               className="input w-auto"
             >
-              <option value="ALL">All Roles</option>
-              <option value="MEMBER">Members</option>
-              <option value="LIBRARIAN">Librarians</option>
+              <option value="ALL">{t('users.allRoles')}</option>
+              <option value="MEMBER">{t('users.members')}</option>
+              <option value="LIBRARIAN">{t('users.librarians')}</option>
             </select>
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
               className="input w-auto"
             >
-              <option value="ALL">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
+              <option value="ALL">{t('users.allStatus')}</option>
+              <option value="ACTIVE">{t('users.active')}</option>
+              <option value="INACTIVE">{t('users.inactive')}</option>
             </select>
           </div>
         </div>
@@ -207,11 +209,11 @@ export default function Users() {
       ) : users.length === 0 ? (
         <div className="text-center py-16">
           <UsersIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No users found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('users.noUsersFound')}</h3>
           <p className="text-gray-500 dark:text-gray-400">
             {searchTerm || roleFilter !== 'ALL' || statusFilter !== 'ALL'
-              ? 'Try adjusting your filters'
-              : 'Add your first user to get started'
+              ? t('users.tryAdjustingFilters')
+              : t('users.addFirstUser')
             }
           </p>
         </div>
@@ -237,16 +239,16 @@ export default function Users() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
                   </div>
                 </div>
-                {/* Role Badge */}
-                <span className={`badge ${
-                  user.role === 'LIBRARIAN' ? 'badge-info' : 'badge-success'
-                }`}>
-                  {user.role === 'LIBRARIAN' ? (
-                    <><Shield size={12} className="mr-1" />Librarian</>
-                  ) : (
-                    <><User size={12} className="mr-1" />Member</>
-                  )}
-                </span>
+              {/* Role Badge */}
+              <span className={`badge ${
+                user.role === 'LIBRARIAN' ? 'badge-info' : 'badge-success'
+              }`}>
+                {user.role === 'LIBRARIAN' ? (
+                  <><Shield size={12} className="mr-1" />{t('users.librarian')}</>
+                ) : (
+                  <><User size={12} className="mr-1" />{t('users.member')}</>
+                )}
+              </span>
               </div>
 
               {/* Info */}
@@ -266,31 +268,31 @@ export default function Users() {
               {/* Status */}
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <button
-                  onClick={() => handleToggleStatus(user.id)}
-                  className={`text-sm font-medium ${
-                    user.active
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400'
-                  } hover:underline`}
-                >
-                  {user.active ? 'Active' : 'Inactive'}
-                </button>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => handleEdit(user)}
-                    className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                    title="Edit"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+            onClick={() => handleToggleStatus(user.id)}
+            className={`text-sm font-medium ${
+              user.active
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-red-600 dark:text-red-400'
+            } hover:underline`}
+          >
+            {user.active ? t('users.active') : t('users.inactive')}
+          </button>
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => handleEdit(user)}
+              className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              title={t('users.edit')}
+            >
+              <Edit size={16} />
+            </button>
+            <button
+              onClick={() => handleDelete(user.id)}
+              className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              title={t('users.delete')}
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
               </div>
             </div>
           ))}
@@ -305,17 +307,17 @@ export default function Users() {
             onClick={() => setPage(p => p - 1)}
             className="btn-secondary disabled:opacity-50"
           >
-            Previous
+            {t('common.previous')}
           </button>
           <span className="px-4 py-2 text-gray-600 dark:text-gray-400">
-            Page {page + 1} of {totalPages}
+            {t('common.page')} {page + 1} {t('common.of')} {totalPages}
           </span>
           <button
             disabled={page >= totalPages - 1}
             onClick={() => setPage(p => p + 1)}
             className="btn-secondary disabled:opacity-50"
           >
-            Next
+            {t('common.next')}
           </button>
         </div>
       )}
@@ -325,12 +327,12 @@ export default function Users() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-              {editingUser ? 'Edit User' : 'Add New User'}
+              {editingUser ? t('users.editUser') : t('users.addNewUser')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Username *</label>
+                  <label className="label">{t('users.username')} *</label>
                   <input
                     type="text"
                     value={formData.username}
@@ -341,7 +343,7 @@ export default function Users() {
                   />
                 </div>
                 <div>
-                  <label className="label">{editingUser ? 'New Password' : 'Password *'}</label>
+                  <label className="label">{editingUser ? t('users.newPassword') : t('users.password')} *</label>
                   <input
                     type="password"
                     value={formData.password}
@@ -353,7 +355,7 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="label">Full Name *</label>
+                <label className="label">{t('users.fullName')} *</label>
                 <input
                   type="text"
                   value={formData.fullName}
@@ -364,7 +366,7 @@ export default function Users() {
               </div>
 
               <div>
-                <label className="label">Email *</label>
+                <label className="label">{t('users.email')} *</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -376,7 +378,7 @@ export default function Users() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Phone</label>
+                  <label className="label">{t('users.phone')}</label>
                   <input
                     type="text"
                     value={formData.phoneNumber}
@@ -385,14 +387,14 @@ export default function Users() {
                   />
                 </div>
                 <div>
-                  <label className="label">Role *</label>
+                  <label className="label">{t('users.role')} *</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                     className="input"
                   >
-                    <option value="MEMBER">Member</option>
-                    <option value="LIBRARIAN">Librarian</option>
+                    <option value="MEMBER">{t('users.member')}</option>
+                    <option value="LIBRARIAN">{t('users.librarian')}</option>
                   </select>
                 </div>
               </div>
@@ -407,17 +409,17 @@ export default function Users() {
                     className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                   />
                   <label htmlFor="active" className="text-sm text-gray-700 dark:text-gray-300">
-                    Active user
+                    {t('users.activeUser')}
                   </label>
                 </div>
               )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="btn-primary">
-                  {editingUser ? 'Update User' : 'Create User'}
+                  {editingUser ? t('users.updateUser') : t('users.createUser')}
                 </button>
               </div>
             </form>

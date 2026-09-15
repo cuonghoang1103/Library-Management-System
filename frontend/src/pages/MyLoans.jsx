@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { loansApi } from '../services/api';
 import { BookOpen, Clock, AlertTriangle, CheckCircle, RefreshCw, Calendar, Book, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyLoans() {
+  const { t } = useTranslation();
   const [activeLoans, setActiveLoans] = useState([]);
   const [historyLoans, setHistoryLoans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ export default function MyLoans() {
       setActiveLoans(active);
       setHistoryLoans(history);
     } catch (err) {
-      toast.error('Failed to load loans');
+      toast.error(t('loans.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -36,20 +38,20 @@ export default function MyLoans() {
   const handleReturn = async (loanId) => {
     try {
       await loansApi.return(loanId);
-      toast.success('Book returned successfully');
+      toast.success(t('loans.returnSuccess'));
       fetchLoans();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to return book');
+      toast.error(err.response?.data?.message || t('loans.returnFailed'));
     }
   };
 
   const handleRenew = async (loanId) => {
     try {
       await loansApi.renew(loanId);
-      toast.success('Loan renewed successfully');
+      toast.success(t('loans.renewSuccess'));
       fetchLoans();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to renew loan');
+      toast.error(err.response?.data?.message || t('loans.renewFailed'));
     }
   };
 
@@ -84,11 +86,11 @@ export default function MyLoans() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Loans</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('loans.pageTitle')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {activeLoans.length > 0
-              ? `${activeLoans.length} active loan${activeLoans.length > 1 ? 's' : ''}`
-              : 'No active loans'
+              ? `${activeLoans.length} ${t('loans.activeLoans')}${activeLoans.length > 1 ? t('loans.plural') : ''}`
+              : t('loans.noActiveLoans')
             }
           </p>
         </div>
@@ -97,7 +99,7 @@ export default function MyLoans() {
           className="btn-primary flex items-center gap-2"
         >
           <Book size={20} />
-          Browse Books
+          {t('loans.browseBooks')}
         </Link>
       </div>
 
@@ -107,21 +109,21 @@ export default function MyLoans() {
           onClick={() => setActiveTab('active')}
           className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'active'
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ? 'bg-blue-600 text-white'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          Active ({activeLoans.length})
+          {t('loans.active')} ({activeLoans.length})
         </button>
         <button
           onClick={() => setActiveTab('history')}
           className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'history'
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ? 'bg-blue-600 text-white'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          History ({historyLoans.length})
+          {t('loans.history')} ({historyLoans.length})
         </button>
       </div>
 
@@ -132,12 +134,12 @@ export default function MyLoans() {
             <BookOpen className="w-10 h-10 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {activeTab === 'active' ? 'No active loans' : 'No borrowing history'}
+            {activeTab === 'active' ? t('loans.noActiveLoans') : t('loans.noHistory')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
             {activeTab === 'active'
-              ? 'You currently have no books on loan. Visit the library to borrow some books!'
-              : 'Your returned books will appear here.'
+              ? t('loans.noActiveLoansDescription')
+              : t('loans.noHistoryDescription')
             }
           </p>
           {activeTab === 'active' && (
@@ -145,7 +147,7 @@ export default function MyLoans() {
               to="/search"
               className="btn-primary inline-flex items-center gap-2"
             >
-              Browse Books
+              {t('loans.browseBooks')}
               <ArrowRight size={18} />
             </Link>
           )}
@@ -177,57 +179,57 @@ export default function MyLoans() {
                       <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                         {loan.bookTitle}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Copy: {loan.copyNumber}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <span className={`badge ${
-                          loan.status === 'OVERDUE' ? 'badge-danger' :
-                          loan.status === 'RETURNED' ? 'badge-success' :
-                          'badge-warning'
-                        }`}>
-                          {isOverdue ? (
-                            <><AlertTriangle size={12} className="mr-1" />Overdue</>
-                          ) : loan.status === 'RETURNED' ? (
-                            <><CheckCircle size={12} className="mr-1" />Returned</>
-                          ) : (
-                            <><Clock size={12} className="mr-1" />Active</>
-                          )}
-                        </span>
-                        {loan.renewalCount > 0 && (
-                          <span className="badge badge-info">
-                            Renewed {loan.renewalCount}/2 times
-                          </span>
-                        )}
-                      </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {t('loans.copy')}: {loan.copyNumber}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <span className={`badge ${
+                      loan.status === 'OVERDUE' ? 'badge-danger' :
+                      loan.status === 'RETURNED' ? 'badge-success' :
+                      'badge-warning'
+                    }`}>
+                      {isOverdue ? (
+                        <><AlertTriangle size={12} className="mr-1" />{t('loans.overdue')}</>
+                      ) : loan.status === 'RETURNED' ? (
+                        <><CheckCircle size={12} className="mr-1" />{t('loans.returned')}</>
+                      ) : (
+                        <><Clock size={12} className="mr-1" />{t('loans.active')}</>
+                      )}
+                    </span>
+                    {loan.renewalCount > 0 && (
+                      <span className="badge badge-info">
+                        {t('loans.renewedCount', { count: loan.renewalCount, max: 2 })}
+                      </span>
+                    )}
+                  </div>
                     </div>
                   </div>
 
-                  {/* Date Info */}
-                  <div className="flex md:flex-row gap-6 md:gap-8">
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Borrowed</div>
-                      <div className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <Calendar size={14} />
-                        {new Date(loan.borrowedDate).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        {isOverdue ? 'Was due' : 'Due in'}
-                      </div>
-                      <div className={`flex items-center gap-1 text-sm font-medium ${
-                        isOverdue ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'
-                      }`}>
-                        <Clock size={14} />
-                        {isOverdue
-                          ? `${Math.abs(daysRemaining)} days ago`
-                          : `${daysRemaining} days`
-                        }
-                      </div>
-                    </div>
+              {/* Date Info */}
+              <div className="flex md:flex-row gap-6 md:gap-8">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('loans.borrowed')}</div>
+                  <div className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Calendar size={14} />
+                    {new Date(loan.borrowedDate).toLocaleDateString()}
                   </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {isOverdue ? t('loans.wasDue') : t('loans.dueIn')}
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${
+                    isOverdue ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    <Clock size={14} />
+                    {isOverdue
+                      ? `${Math.abs(daysRemaining)} ${t('loans.daysAgo')}`
+                      : `${daysRemaining} ${t('loans.days')}`
+                    }
+                  </div>
+                </div>
+              </div>
 
                   {/* Progress Bar */}
                   {activeTab === 'active' && (
@@ -243,36 +245,36 @@ export default function MyLoans() {
                     </div>
                   )}
 
-                  {/* Actions */}
-                  {activeTab === 'active' && (
-                    <div className="flex gap-2 md:ml-4">
-                      {canRenew && (
-                        <button
-                          onClick={() => handleRenew(loan.id)}
-                          className="btn-secondary flex items-center gap-1 text-sm"
-                          title="Renew loan"
-                        >
-                          <RefreshCw size={14} />
-                          Renew
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleReturn(loan.id)}
-                        className="btn-primary flex items-center gap-1 text-sm"
-                      >
-                        <CheckCircle size={14} />
-                        Return
-                      </button>
-                    </div>
+              {/* Actions */}
+              {activeTab === 'active' && (
+                <div className="flex gap-2 md:ml-4">
+                  {canRenew && (
+                    <button
+                      onClick={() => handleRenew(loan.id)}
+                      className="btn-secondary flex items-center gap-1 text-sm"
+                      title={t('loans.renewLoan')}
+                    >
+                      <RefreshCw size={14} />
+                      {t('loans.renew')}
+                    </button>
                   )}
+                  <button
+                    onClick={() => handleReturn(loan.id)}
+                    className="btn-primary flex items-center gap-1 text-sm"
+                  >
+                    <CheckCircle size={14} />
+                    {t('loans.return')}
+                  </button>
+                </div>
+              )}
                 </div>
 
-                {/* Loan Details */}
-                {loan.returnedDate && (
-                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-                    Returned on {new Date(loan.returnedDate).toLocaleDateString()}
-                  </div>
-                )}
+              {/* Loan Details */}
+              {loan.returnedDate && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+                  {t('loans.returnedOn')} {new Date(loan.returnedDate).toLocaleDateString()}
+                </div>
+              )}
               </div>
             );
           })}
@@ -284,23 +286,23 @@ export default function MyLoans() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{activeLoans.length}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Active Loans</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('loans.activeLoans')}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">{historyLoans.length}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Books Returned</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('loans.booksReturned')}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
             <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {activeLoans.filter(l => getDaysRemaining(l.dueDate) <= 3 && getDaysRemaining(l.dueDate) > 0).length}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Due Soon</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('loans.dueSoon')}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
             <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {activeLoans.filter(l => l.status === 'OVERDUE').length}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Overdue</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('loans.overdue')}</div>
           </div>
         </div>
       )}

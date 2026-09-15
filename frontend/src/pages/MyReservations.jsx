@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { reservationsApi } from '../services/api';
 import { Bell, Clock, CheckCircle, XCircle, AlertCircle, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyReservations() {
+  const { t } = useTranslation();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,21 +19,21 @@ export default function MyReservations() {
       const res = await reservationsApi.getMyReservations();
       setReservations(res.data.data || []);
     } catch (err) {
-      toast.error('Failed to load reservations');
+      toast.error(t('reservations.loadFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = async (reservationId) => {
-    if (!confirm('Are you sure you want to cancel this reservation?')) return;
+    if (!confirm(t('reservations.confirmCancel'))) return;
     
     try {
       await reservationsApi.cancel(reservationId);
-      toast.success('Reservation cancelled');
+      toast.success(t('reservations.cancelSuccess'));
       fetchReservations();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to cancel reservation');
+      toast.error(err.response?.data?.message || t('reservations.cancelFailed'));
     }
   };
 
@@ -88,11 +90,11 @@ export default function MyReservations() {
     <div className="p-4 md:p-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Reservations</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('reservations.pageTitle')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {activeReservations.length > 0 
-            ? `${activeReservations.length} active reservation${activeReservations.length > 1 ? 's' : ''}`
-            : 'No active reservations'
+          {activeReservations.length > 0
+            ? `${activeReservations.length} ${t('reservations.activeReservations')}${activeReservations.length > 1 ? t('reservations.plural') : ''}`
+            : t('reservations.noActive')
           }
         </p>
       </div>
@@ -100,7 +102,7 @@ export default function MyReservations() {
       {/* Active Reservations */}
       {activeReservations.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Reservations</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('reservations.activeReservations')}</h2>
           {activeReservations.map((reservation) => (
             <div
               key={reservation.id}
@@ -128,22 +130,22 @@ export default function MyReservations() {
                         {getStatusIcon(reservation.status)}
                         <span className="ml-1">{reservation.status}</span>
                       </span>
-                      {reservation.status === 'WAITING' && reservation.position && (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          Position #{reservation.position} in queue
-                        </span>
-                      )}
+                    {reservation.status === 'WAITING' && reservation.position && (
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {t('reservations.positionInQueue', { position: reservation.position })}
+                      </span>
+                    )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                   {reservation.expiresAt && (
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                        <Clock size={14} />
-                        {reservation.status === 'READY' ? 'Pick up by' : 'Expires'}
-                      </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                      <Clock size={14} />
+                      {reservation.status === 'READY' ? t('reservations.pickupBy') : t('reservations.expires')}
+                    </div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {new Date(reservation.expiresAt).toLocaleDateString()}
                       </div>
@@ -156,28 +158,26 @@ export default function MyReservations() {
                       className="btn-secondary text-sm flex items-center gap-1"
                     >
                       <XCircle size={16} />
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   )}
 
                   {reservation.status === 'READY' && (
                     <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                      Pick up at library
+                      {t('reservations.pickupAtLibrary')}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Ready notification message */}
-              {reservation.status === 'READY' && (
-                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    Your reserved book is ready! Please pick it up within {reservation.expiresAt ? 
-                      Math.ceil((new Date(reservation.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : 3
-                    } days.
-                  </p>
-                </div>
-              )}
+                {/* Ready notification message */}
+                {reservation.status === 'READY' && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      {t('reservations.readyMessage', { days: reservation.expiresAt ? Math.ceil((new Date(reservation.expiresAt) - new Date()) / (1000 * 60 * 60 * 24)) : 3 })}
+                    </p>
+                  </div>
+                )}
             </div>
           ))}
         </div>
@@ -186,14 +186,14 @@ export default function MyReservations() {
       {/* Past Reservations */}
       {pastReservations.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Past Reservations</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('reservations.pastReservations')}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="table-header">
-                  <th className="px-4 py-3 text-left">Book</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Reserved Date</th>
+                  <th className="px-4 py-3 text-left">{t('books.book')}</th>
+                  <th className="px-4 py-3 text-left">{t('reservations.status')}</th>
+                  <th className="px-4 py-3 text-left">{t('reservations.reservedDate')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -226,10 +226,10 @@ export default function MyReservations() {
             <Bell className="w-10 h-10 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No reservations yet
+            {t('reservations.noReservations')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-            When you reserve a book that's currently unavailable, it will appear here. You'll be notified when it becomes available.
+            {t('reservations.noReservationsDescription')}
           </p>
         </div>
       )}
