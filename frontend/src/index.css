@@ -17,7 +17,8 @@ body {
 
 /* Dark mode styles */
 .dark body {
-  @apply bg-gray-900 text-gray-100;
+  @apply bg-gray-900;
+  color: #f3f4f6;
 }
 
 .dark .card,
@@ -41,20 +42,28 @@ body {
 
 .dark .text-gray-900,
 .dark .text-gray-800 {
-  @apply text-gray-100;
+  color: #f3f4f6;
 }
 
-.dark .text-gray-700,
-.dark .text-gray-600 {
-  @apply text-gray-300;
-}
-
-.dark .text-gray-500 {
-  @apply text-gray-400;
+/* Dark mode text colors - use direct color values to avoid circular @apply */
+.dark .text-gray-300 {
+  color: #d1d5db;
 }
 
 .dark .text-gray-400 {
-  @apply text-gray-500;
+  color: #9ca3af;
+}
+
+.dark .text-gray-500 {
+  color: #6b7280;
+}
+
+.dark .text-gray-600 {
+  color: #4b5563;
+}
+
+.dark .text-gray-700 {
+  color: #374151;
 }
 
 .dark aside {
@@ -62,11 +71,13 @@ body {
 }
 
 .dark .sidebar-link {
-  @apply text-gray-300 hover:bg-gray-700 hover:text-blue-400;
+  color: #d1d5db;
+  @apply hover:bg-gray-700 hover:text-blue-400;
 }
 
 .dark .sidebar-link.active {
-  @apply bg-gray-700 text-blue-400;
+  @apply bg-gray-700;
+  color: #60a5fa;
 }
 
 .dark .stat-value {
@@ -74,7 +85,7 @@ body {
 }
 
 .dark .stat-label {
-  @apply text-gray-400;
+  color: #9ca3af;
 }
 
 /* Form elements in dark mode */
@@ -92,7 +103,8 @@ body {
 
 /* Table styles in dark mode */
 .dark .table-header {
-  @apply bg-gray-700 text-gray-300;
+  @apply bg-gray-700;
+  color: #d1d5db;
 }
 
 .dark .table-row {
@@ -145,11 +157,13 @@ body {
 }
 
 .dark .sidebar-link {
-  @apply text-gray-300 hover:bg-gray-700 hover:text-blue-400;
+  color: #d1d5db;
+  @apply hover:bg-gray-700 hover:text-blue-400;
 }
 
 .dark .sidebar-link.active {
-  @apply bg-gray-700 text-blue-400 font-medium;
+  @apply bg-gray-700;
+  color: #60a5fa;
 }
 
 .btn-primary {
@@ -165,7 +179,8 @@ body {
 }
 
 .dark .btn-secondary {
-  @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+  @apply bg-gray-700 hover:bg-gray-600;
+  color: #d1d5db;
 }
 
 .btn-danger {
@@ -193,7 +208,7 @@ body {
 }
 
 .dark .input::placeholder {
-  @apply text-gray-400;
+  color: #9ca3af;
 }
 
 .label {
@@ -201,7 +216,7 @@ body {
 }
 
 .dark .label {
-  @apply text-gray-300;
+  color: #d1d5db;
 }
 
 .table-header {
@@ -209,7 +224,8 @@ body {
 }
 
 .dark .table-header {
-  @apply bg-gray-700 text-gray-300;
+  @apply bg-gray-700;
+  color: #d1d5db;
 }
 
 .table-row {
@@ -277,7 +293,7 @@ body {
 }
 
 .dark .stat-label {
-  @apply text-gray-400;
+  color: #9ca3af;
 }
 
 /* Line clamp utilities */
