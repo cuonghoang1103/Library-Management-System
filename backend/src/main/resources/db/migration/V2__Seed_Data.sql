@@ -2,7 +2,7 @@
 -- Seed data for testing
 
 -- Insert Librarian (password: librarian123 - BCrypt encoded)
-INSERT INTO users (username, password, full_name, email, phone_number, role, active)
+INSERT INTO users (username, password, full_name, email, phone_number, role, active, created_at)
 VALUES (
   'librarian',
   '$2b$10$7vCMIOj7p81VmcJFjkm1I.jxvwgP6GWDZk/CWFM.syBY2htV6bp8W',
@@ -10,15 +10,16 @@ VALUES (
   'librarian@library.com',
   '0901234567',
   'LIBRARIAN',
-  TRUE
+  TRUE,
+  CURRENT_TIMESTAMP
 );
 
 -- Insert Members (password: member123 - BCrypt encoded)
-INSERT INTO users (username, password, full_name, email, phone_number, role, active)
+INSERT INTO users (username, password, full_name, email, phone_number, role, active, created_at)
 VALUES
-('john_doe', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'John Doe', 'john@example.com', '0901111111', 'MEMBER', TRUE),
-('jane_smith', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'Jane Smith', 'jane@example.com', '0902222222', 'MEMBER', TRUE),
-('bob_wilson', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'Bob Wilson', 'bob@example.com', '0903333333', 'MEMBER', TRUE);
+('john_doe', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'John Doe', 'john@example.com', '0901111111', 'MEMBER', TRUE, CURRENT_TIMESTAMP),
+('jane_smith', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'Jane Smith', 'jane@example.com', '0902222222', 'MEMBER', TRUE, CURRENT_TIMESTAMP),
+('bob_wilson', '$2b$10$870vrZBBVWmAWaXQmgLM8Ov3bhyWeW1bW/LzpGufp4O7mun7nsCa2', 'Bob Wilson', 'bob@example.com', '0903333333', 'MEMBER', TRUE, CURRENT_TIMESTAMP);
 
 -- Insert sample books
 INSERT INTO books (title, description, author, isbn, publisher, published_date, genre, total_copies, available_copies)
