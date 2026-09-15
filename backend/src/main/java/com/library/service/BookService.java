@@ -2,6 +2,7 @@ package com.library.service;
 
 import com.library.dto.BookDTO;
 import com.library.dto.CopyDTO;
+import com.library.entity.AuditLog;
 import com.library.entity.Book;
 import com.library.entity.BookCopy;
 import com.library.entity.CopyStatus;
@@ -20,11 +21,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BookService {
-    
-    private final BookRepository bookRepository;
-    private final BookCopyRepository copyRepository;
-    
-    private static final int DEFAULT_LOAN_DAYS = 14;
+
+ private final BookRepository bookRepository;
+ private final BookCopyRepository copyRepository;
+ private final AuditLogService auditLogService;
+
+ private static final int DEFAULT_LOAN_DAYS = 14;
     
     public Page<BookDTO> getAllBooks(Pageable pageable) {
         return bookRepository.findAll(pageable).map(this::toDTO);
@@ -45,21 +47,26 @@ public class BookService {
     
     @Transactional
     public BookDTO createBook(BookDTO dto) {
-        Book book = Book.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .author(dto.getAuthor())
-                .isbn(dto.getIsbn())
-                .publisher(dto.getPublisher())
-                .publishedDate(dto.getPublishedDate())
-                .genre(dto.getGenre())
-                .totalCopies(0)
-                .availableCopies(0)
-                .build();
+ Book book = Book.builder()
+ .title(dto.getTitle())
+ .description(dto.getDescription())
+ .author(dto.getAuthor())
+ .isbn(dto.getIsbn())
+ .publisher(dto.getPublisher())
+ .publishedDate(dto.getPublishedDate())
+ .genre(dto.getGenre())
+ .coverImage(dto.getCoverImage())
+ .language(dto.getLanguage())
+ .pages(dto.getPages())
+ .totalCopies(0)
+ .availableCopies(0)
+ .build();
         
-        book = bookRepository.save(book);
-        
-        // Create initial copies if specified
+ book = bookRepository.save(book);
+
+ auditLogService.logCreate(null, AuditLog.Entities.BOOK, book.getId(), toDTO(book), null);
+
+ // Create initial copies if specified
         if (dto.getTotalCopies() > 0) {
             for (int i = 1; i <= dto.getTotalCopies(); i++) {
                 BookCopy copy = BookCopy.builder()
@@ -88,14 +95,17 @@ public class BookService {
         book.setAuthor(dto.getAuthor());
         book.setIsbn(dto.getIsbn());
         book.setPublisher(dto.getPublisher());
-        book.setPublishedDate(dto.getPublishedDate());
-        book.setGenre(dto.getGenre());
-        
-        return toDTO(bookRepository.save(book));
-    }
-    
-    @Transactional
-    public void deleteBook(Long id) {
+ book.setPublishedDate(dto.getPublishedDate());
+ book.setGenre(dto.getGenre());
+ book.setCoverImage(dto.getCoverImage());
+ book.setLanguage(dto.getLanguage());
+ book.setPages(dto.getPages());
+
+ return toDTO(bookRepository.save(book));
+ }
+
+ @Transactional
+ public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
         bookRepository.delete(book);
@@ -162,20 +172,23 @@ public class BookService {
         return toCopyDTO(copy);
     }
     
-    private BookDTO toDTO(Book book) {
-        return BookDTO.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .description(book.getDescription())
-                .author(book.getAuthor())
-                .isbn(book.getIsbn())
-                .publisher(book.getPublisher())
-                .publishedDate(book.getPublishedDate())
-                .genre(book.getGenre())
-                .totalCopies(book.getTotalCopies())
-                .availableCopies(book.getAvailableCopies())
-                .build();
-    }
+ private BookDTO toDTO(Book book) {
+ return BookDTO.builder()
+ .id(book.getId())
+ .title(book.getTitle())
+ .description(book.getDescription())
+ .author(book.getAuthor())
+ .isbn(book.getIsbn())
+ .publisher(book.getPublisher())
+ .publishedDate(book.getPublishedDate())
+ .genre(book.getGenre())
+ .coverImage(book.getCoverImage())
+ .language(book.getLanguage())
+ .pages(book.getPages())
+ .totalCopies(book.getTotalCopies())
+ .availableCopies(book.getAvailableCopies())
+ .build();
+ }
     
     private CopyDTO toCopyDTO(BookCopy copy) {
         return CopyDTO.builder()

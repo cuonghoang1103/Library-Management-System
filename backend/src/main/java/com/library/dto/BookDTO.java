@@ -20,8 +20,11 @@ public class BookDTO {
     
     private String isbn;
     private String publisher;
-    private LocalDate publishedDate;
-    private String genre;
-    private int totalCopies;
-    private int availableCopies;
+ private LocalDate publishedDate;
+ private String genre;
+ private String coverImage;
+ private String language;
+ private Integer pages;
+ private int totalCopies;
+ private int availableCopies;
 }

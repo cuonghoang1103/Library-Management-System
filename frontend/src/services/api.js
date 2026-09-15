@@ -49,19 +49,20 @@ export const booksApi = {
     api.patch(`/books/copies/${copyId}/status`, null, { params: { status } }),
 };
 
-// Loans API
+ // Loans API
 export const loansApi = {
-  getAll: (page = 0, size = 10) => 
-    api.get('/loans', { params: { page, size } }),
-  getById: (id) => api.get(`/loans/${id}`),
-  getByUser: (userId, page = 0, size = 10) => 
-    api.get(`/loans/user/${userId}`, { params: { page, size } }),
-  getMyLoans: () => api.get('/loans/my-loans'),
-  getOverdue: () => api.get('/loans/overdue'),
-  getCopyHistory: (copyId) => api.get(`/loans/copy/${copyId}/history`),
-  create: (data) => api.post('/loans', data),
-  return: (id) => api.post(`/loans/${id}/return`),
-  renew: (id) => api.post(`/loans/${id}/renew`),
+ getAll: (page = 0, size = 10) =>
+ api.get('/loans', { params: { page, size } }),
+ getById: (id) => api.get(`/loans/${id}`),
+ getByUser: (userId, page = 0, size = 10) =>
+ api.get(`/loans/user/${userId}`, { params: { page, size } }),
+ getMyLoans: () => api.get('/loans/my-loans'),
+ getOverdue: () => api.get('/loans/overdue'),
+ getCopyHistory: (copyId) => api.get(`/loans/copy/${copyId}/history`),
+ create: (data) => api.post('/loans', data),
+ borrow: (copyId) => api.post(`/loans/borrow/${copyId}`),
+ return: (id) => api.post(`/loans/${id}/return`),
+ renew: (id) => api.post(`/loans/${id}/renew`),
 };
 
 // Users API
@@ -80,8 +81,23 @@ export const feesApi = {
   getByUser: (userId) => api.get(`/fees/user/${userId}`),
   getMyFees: () => api.get('/fees/my-fees'),
   getMyTotal: () => api.get('/fees/my-fees/total'),
-  create: (userId, type, amount, description, loanId) => 
+  create: (userId, type, amount, description, loanId) =>
     api.post('/fees', null, { params: { userId, type, amount, description, loanId } }),
   markPaid: (id) => api.post(`/fees/${id}/pay`),
   delete: (id) => api.delete(`/fees/${id}`),
+};
+
+// Reservations API
+export const reservationsApi = {
+  getMyReservations: () => api.get('/reservations/my'),
+  create: (bookId) => api.post(`/reservations/book/${bookId}`),
+  cancel: (reservationId) => api.delete(`/reservations/${reservationId}`),
+};
+
+// Notifications API
+export const notificationsApi = {
+  getAll: () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markAsRead: (id) => api.post(`/notifications/${id}/read`),
+  markAllAsRead: () => api.post('/notifications/read-all'),
 };

@@ -8,9 +8,13 @@ import Books from './pages/Books';
 import BookDetail from './pages/BookDetail';
 import Loans from './pages/Loans';
 import MyLoans from './pages/MyLoans';
+import MyReservations from './pages/MyReservations';
 import Users from './pages/Users';
 import Search from './pages/Search';
 import Overdue from './pages/Overdue';
+import Settings from './pages/Settings';
+import AuditLogs from './pages/AuditLogs';
+import Reports from './pages/Reports';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -47,13 +51,17 @@ function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="search" element={<Search />} />
-        <Route path="my-loans" element={<MyLoans />} />
-        <Route path="books" element={<Books />} />
+ <Route path="search" element={<Search />} />
+ <Route path="my-loans" element={<MyLoans />} />
+ <Route path="my-reservations" element={<MyReservations />} />
+ <Route path="books" element={<Books />} />
         <Route path="books/:id" element={<BookDetail />} />
         <Route path="loans" element={<LibrarianRoute><Loans /></LibrarianRoute>} />
         <Route path="users" element={<LibrarianRoute><Users /></LibrarianRoute>} />
         <Route path="overdue" element={<LibrarianRoute><Overdue /></LibrarianRoute>} />
+ <Route path="settings" element={<LibrarianRoute><Settings /></LibrarianRoute>} />
+ <Route path="audit-logs" element={<LibrarianRoute><AuditLogs /></LibrarianRoute>} />
+ <Route path="reports" element={<LibrarianRoute><Reports /></LibrarianRoute>} />
       </Route>
     </Routes>
   );

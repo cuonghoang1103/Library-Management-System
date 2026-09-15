@@ -80,9 +80,20 @@ public class LoanController {
         return ResponseEntity.ok(ApiResponse.success("Book returned successfully", loan));
     }
     
-    @PostMapping("/{id}/renew")
-    public ResponseEntity<ApiResponse<LoanDTO>> renewLoan(@PathVariable Long id) {
-        LoanDTO loan = loanService.renewLoan(id);
-        return ResponseEntity.ok(ApiResponse.success("Loan renewed successfully", loan));
-    }
+ @PostMapping("/{id}/renew")
+ public ResponseEntity<ApiResponse<LoanDTO>> renewLoan(@PathVariable Long id) {
+ LoanDTO loan = loanService.renewLoan(id);
+ return ResponseEntity.ok(ApiResponse.success("Loan renewed successfully", loan));
+ }
+
+ /**
+ * Self-service borrowing - members can borrow available books directly
+ */
+ @PostMapping("/borrow/{copyId}")
+ public ResponseEntity<ApiResponse<LoanDTO>> borrowBook(
+ @PathVariable Long copyId,
+ @AuthenticationPrincipal CustomUserDetails userDetails) {
+ LoanDTO loan = loanService.borrowBook(copyId, userDetails.getId());
+ return ResponseEntity.ok(ApiResponse.success("Book borrowed successfully", loan));
+ }
 }

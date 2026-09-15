@@ -192,13 +192,65 @@ public class LoanService {
      * Derive overdue list from ACTIVE loans past their due date.
      * No background job needed - computed on demand.
      */
-    public List<LoanDTO> getOverdueList() {
-        return loanRepository.findOverdueLoans(LocalDate.now(), Pageable.unpaged()).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-    
-    private LoanDTO toDTO(Loan loan) {
+ public List<LoanDTO> getOverdueList() {
+ return loanRepository.findOverdueLoans(LocalDate.now(), Pageable.unpaged()).stream()
+ .map(this::toDTO)
+ .collect(Collectors.toList());
+ }
+
+ /**
+ * Self-service borrowing - members borrow a book directly
+ */
+ @Transactional
+ public LoanDTO borrowBook(Long copyId, Long userId) {
+ // Validate copy is available
+ BookCopy copy = copyRepository.findById(copyId)
+ .orElseThrow(() -> new ResourceNotFoundException("Copy not found"));
+
+ if (copy.getStatus() != CopyStatus.ON_SHELF) {
+ throw new BadRequestException("This copy is not available for borrowing");
+ }
+
+ // Check if copy already has an active loan
+ Optional<Loan> existingLoan = loanRepository.findActiveLoanByCopyId(copyId);
+ if (existingLoan.isPresent()) {
+ throw new BadRequestException("This copy is already on loan");
+ }
+
+ // Validate user
+ User user = userRepository.findById(userId)
+ .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+ if (user.getRole() != Role.MEMBER) {
+ throw new BadRequestException("Only members can borrow books");
+ }
+
+ LocalDate borrowedDate = LocalDate.now();
+ LocalDate dueDate = borrowedDate.plusDays(DEFAULT_LOAN_DAYS);
+
+ // Update copy status
+ copy.setStatus(CopyStatus.LOANED);
+ copyRepository.save(copy);
+
+ // Update book's available count
+ Book book = copy.getBook();
+ book.setAvailableCopies(book.getAvailableCopies() - 1);
+ bookRepository.save(book);
+
+ // Create loan
+ Loan loan = Loan.builder()
+ .user(user)
+ .copy(copy)
+ .borrowedDate(borrowedDate)
+ .dueDate(dueDate)
+ .status(LoanStatus.ACTIVE)
+ .renewalCount(0)
+ .build();
+
+ return toDTO(loanRepository.save(loan));
+ }
+
+ private LoanDTO toDTO(Loan loan) {
         boolean canRenew = loan.canRenew(MAX_RENEWALS);
         return LoanDTO.builder()
                 .id(loan.getId())

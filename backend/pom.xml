@@ -17,11 +17,11 @@
     <name>library-management</name>
     <description>Library Management System - Spring Boot 3 + React</description>
 
-    <properties>
-        <java.version>21</java.version>
-        <jjwt.version>0.12.3</jjwt.version>
-        <lombok.version>1.18.36</lombok.version>
-    </properties>
+<properties>
+ <java.version>21</java.version>
+ <jjwt.version>0.12.3</jjwt.version>
+ <lombok.version>1.18.40</lombok.version>
+ </properties>
 
     <dependencies>
         <!-- Spring Boot Starters -->
@@ -102,20 +102,36 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+<build>
+ <plugins>
+ <plugin>
+ <groupId>org.apache.maven.plugins</groupId>
+ <artifactId>maven-compiler-plugin</artifactId>
+ <version>3.13.0</version>
+ <configuration>
+ <release>21</release>
+ <annotationProcessorPaths>
+ <path>
+ <groupId>org.projectlombok</groupId>
+ <artifactId>lombok</artifactId>
+ <version>${lombok.version}</version>
+ </path>
+ </annotationProcessorPaths>
+ </configuration>
+ </plugin>
+
+ <plugin>
+ <groupId>org.springframework.boot</groupId>
+ <artifactId>spring-boot-maven-plugin</artifactId>
+ <configuration>
+ <excludes>
+ <exclude>
+ <groupId>org.projectlombok</groupId>
+ <artifactId>lombok</artifactId>
+ </exclude>
+ </excludes>
+ </configuration>
+ </plugin>
 
             <!-- JaCoCo for Test Coverage -->
             <plugin>

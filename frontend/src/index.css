@@ -15,6 +15,127 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
+/* Dark mode styles */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.dark .card,
+.dark .stat-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .bg-white {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  @apply bg-gray-700;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  @apply border-gray-700;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  @apply text-gray-100;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  @apply text-gray-300;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+.dark .text-gray-400 {
+  @apply text-gray-500;
+}
+
+.dark aside {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .sidebar-link {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-blue-400;
+}
+
+.dark .sidebar-link.active {
+  @apply bg-gray-700 text-blue-400;
+}
+
+.dark .stat-value {
+  @apply text-gray-100;
+}
+
+.dark .stat-label {
+  @apply text-gray-400;
+}
+
+/* Form elements in dark mode */
+.dark input,
+.dark select,
+.dark textarea {
+  @apply bg-gray-700 border-gray-600 text-gray-100;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  @apply border-blue-500 ring-blue-500;
+}
+
+/* Table styles in dark mode */
+.dark .table-header {
+  @apply bg-gray-700 text-gray-300;
+}
+
+.dark .table-row {
+  @apply border-gray-700 hover:bg-gray-700;
+}
+
+/* Modal/Dialog in dark mode */
+.dark .fixedinset-0 {
+  @apply bg-gray-900 bg-opacity-75;
+}
+
+/* Sidebar toggle animation */
+.sidebar-transition {
+  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+/* Hide sidebar on mobile */
+@media (max-width: 768px) {
+  .sidebar-hidden {
+    transform: translateX(-100%);
+  }
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  @apply bg-gray-200 rounded;
+}
+
+.dark .skeleton {
+  @apply bg-gray-700;
+}
+
+/* Utility classes */
 .sidebar-link {
   @apply flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors;
 }
@@ -23,36 +144,80 @@ body {
   @apply bg-blue-50 text-blue-600 font-medium;
 }
 
+.dark .sidebar-link {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-blue-400;
+}
+
+.dark .sidebar-link.active {
+  @apply bg-gray-700 text-blue-400 font-medium;
+}
+
 .btn-primary {
   @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium;
+}
+
+.dark .btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700;
 }
 
 .btn-secondary {
   @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium;
 }
 
+.dark .btn-secondary {
+  @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+}
+
 .btn-danger {
   @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium;
+}
+
+.dark .btn-danger {
+  @apply bg-red-600 hover:bg-red-700;
 }
 
 .card {
   @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
 }
 
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
 .input {
   @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow;
+}
+
+.dark .input {
+  @apply bg-gray-700 border-gray-600 text-white;
+}
+
+.dark .input::placeholder {
+  @apply text-gray-400;
 }
 
 .label {
   @apply block text-sm font-medium text-gray-700 mb-1;
 }
 
+.dark .label {
+  @apply text-gray-300;
+}
+
 .table-header {
   @apply bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider;
 }
 
+.dark .table-header {
+  @apply bg-gray-700 text-gray-300;
+}
+
 .table-row {
   @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+}
+
+.dark .table-row {
+  @apply border-gray-700 hover:bg-gray-700;
 }
 
 .badge {
@@ -63,26 +228,69 @@ body {
   @apply bg-green-100 text-green-800;
 }
 
+.dark .badge-success {
+  @apply bg-green-900 text-green-300;
+}
+
 .badge-warning {
   @apply bg-yellow-100 text-yellow-800;
+}
+
+.dark .badge-warning {
+  @apply bg-yellow-900 text-yellow-300;
 }
 
 .badge-danger {
   @apply bg-red-100 text-red-800;
 }
 
+.dark .badge-danger {
+  @apply bg-red-900 text-red-300;
+}
+
 .badge-info {
   @apply bg-blue-100 text-blue-800;
+}
+
+.dark .badge-info {
+  @apply bg-blue-900 text-blue-300;
 }
 
 .stat-card {
   @apply bg-white rounded-xl p-6 shadow-sm border border-gray-200;
 }
 
+.dark .stat-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
 .stat-value {
   @apply text-3xl font-bold text-gray-900;
 }
 
+.dark .stat-value {
+  @apply text-gray-100;
+}
+
 .stat-label {
   @apply text-sm text-gray-500 mt-1;
+}
+
+.dark .stat-label {
+  @apply text-gray-400;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

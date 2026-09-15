@@ -38,11 +38,20 @@ public class Book {
     @Column(name = "published_date")
     private LocalDate publishedDate;
     
-    @Column(name = "genre")
-    private String genre;
-    
-    @Column(name = "total_copies", nullable = false)
-    private int totalCopies = 0;
+ @Column(name = "genre")
+ private String genre;
+
+ @Column(name = "cover_image", length = 500)
+ private String coverImage;
+
+ @Column(name = "language")
+ private String language;
+
+ @Column(name = "pages")
+ private Integer pages;
+
+ @Column(name = "total_copies", nullable = false)
+ private int totalCopies = 0;
     
     @Column(name = "available_copies", nullable = false)
     private int availableCopies = 0;

@@ -1,45 +1,61 @@
 import { useState, useEffect } from 'react';
-import { loansApi, booksApi, usersApi } from '../services/api';
-import { Plus, BookOpen } from 'lucide-react';
+import { loansApi, usersApi } from '../services/api';
+import { Plus, BookOpen, RefreshCw, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+// Skeleton
+const LoanSkeleton = () => (
+  <tr className="border-b border-gray-100 dark:border-gray-700">
+    <td className="px-4 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse"></div></td>
+    <td className="px-4 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div></td>
+    <td className="px-4 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div></td>
+    <td className="px-4 py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div></td>
+    <td className="px-4 py-4"><div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16 animate-pulse"></div></td>
+  </tr>
+);
 
 export default function Loans() {
   const [loans, setLoans] = useState([]);
-  const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ userId: '', copyId: '', dueDate: '' });
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchLoans();
-  }, [page]);
+  }, [page, statusFilter]);
 
   const fetchLoans = async () => {
     setLoading(true);
     try {
-      const res = await loansApi.getAll(page, 10);
-      setLoans(res.data.data.content || []);
+      const res = await loansApi.getAll(page, 20);
+      let loansData = res.data.data.content || [];
+
+      // Filter by status
+      if (statusFilter !== 'ALL') {
+        loansData = loansData.filter(l => l.status === statusFilter);
+      }
+
+      // Search filter
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        loansData = loansData.filter(l =>
+          l.bookTitle?.toLowerCase().includes(term) ||
+          l.userName?.toLowerCase().includes(term) ||
+          l.copyNumber?.toLowerCase().includes(term)
+        );
+      }
+
+      setLoans(loansData);
       setTotalPages(res.data.data.totalPages || 0);
+      setTotalElements(res.data.data.totalElements || 0);
     } catch (err) {
       toast.error('Failed to load loans');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreateLoan = async (e) => {
-    e.preventDefault();
-    try {
-      await loansApi.create(formData);
-      toast.success('Loan created successfully');
-      setShowModal(false);
-      setFormData({ userId: '', copyId: '', dueDate: '' });
-      fetchLoans();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create loan');
     }
   };
 
@@ -53,119 +69,185 @@ export default function Loans() {
     }
   };
 
-  const openCreateModal = async () => {
+  const handleRenew = async (loanId) => {
     try {
-      const [booksRes, usersRes] = await Promise.all([
-        booksApi.getAll(0, 100),
-        usersApi.getAll(0, 100),
-      ]);
-      setBooks(booksRes.data.data.content || []);
-      setUsers((usersRes.data.data.content || []).filter(u => u.role === 'MEMBER'));
-      setShowModal(true);
+      await loansApi.renew(loanId);
+      toast.success('Loan renewed successfully');
+      fetchLoans();
     } catch (err) {
-      toast.error('Failed to load data');
+      toast.error(err.response?.data?.message || 'Failed to renew loan');
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'ACTIVE': return <Clock size={14} className="mr-1" />;
+      case 'OVERDUE': return <AlertTriangle size={14} className="mr-1" />;
+      case 'RETURNED': return <CheckCircle size={14} className="mr-1" />;
+      default: return null;
     }
   };
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Loans</h1>
-        <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
-          <Plus size={20} /> New Loan
-        </button>
+    <div className="p-4 md:p-8 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Loans</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {totalElements > 0 ? `${totalElements} total loans` : 'No loans found'}
+          </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by book, member, or copy number..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
+              className="input"
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {['ALL', 'ACTIVE', 'OVERDUE', 'RETURNED'].map(status => (
+              <button
+                key={status}
+                onClick={() => { setStatusFilter(status); setPage(0); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  statusFilter === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                {status === 'ALL' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Loans Table */}
-      <div className="card overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : loans.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No loans found</p>
-          </div>
-        ) : (
           <table className="w-full">
-            <thead>
-              <tr className="table-header">
-                <th className="px-6 py-3">Book</th>
-                <th className="px-6 py-3">Member</th>
-                <th className="px-6 py-3">Borrowed</th>
-                <th className="px-6 py-3">Due Date</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
             <tbody>
-              {loans.map((loan) => (
-                <tr key={loan.id} className="table-row">
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-gray-900">{loan.bookTitle}</p>
-                    <p className="text-sm text-gray-500">{loan.copyNumber}</p>
-                  </td>
-                  <td className="px-6 py-4">{loan.userName}</td>
-                  <td className="px-6 py-4">{new Date(loan.borrowedDate).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">{new Date(loan.dueDate).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">
-                    <span className={`badge ${
-                      loan.status === 'OVERDUE' ? 'badge-danger' :
-                      loan.status === 'RETURNED' ? 'badge-info' :
-                      loan.status === 'CLOSED' ? 'badge-success' : 'badge-warning'
-                    }`}>
-                      {loan.status}
-                    </span>
-                    {loan.daysOverdue > 0 && <span className="block text-xs text-red-600 mt-1">{loan.daysOverdue} days overdue</span>}
-                  </td>
-                  <td className="px-6 py-4">
-                    {loan.status === 'ACTIVE' || loan.status === 'OVERDUE' ? (
-                      <button onClick={() => handleReturn(loan.id)} className="btn-primary text-sm py-1">Return</button>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {[...Array(5)].map((_, i) => <LoanSkeleton key={i} />)}
             </tbody>
           </table>
+        ) : loans.length === 0 ? (
+          <div className="text-center py-16">
+            <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No loans found</h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              {statusFilter !== 'ALL' ? `No ${statusFilter.toLowerCase()} loans` : 'Create your first loan from the book detail page'}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="table-header">
+                  <th className="px-4 py-3">Book</th>
+                  <th className="px-4 py-3">Member</th>
+                  <th className="px-4 py-3">Borrowed</th>
+                  <th className="px-4 py-3">Due Date</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Renewals</th>
+                  <th className="px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loans.map((loan) => (
+                  <tr key={loan.id} className="table-row">
+                    <td className="px-4 py-4">
+                      <p className="font-medium text-gray-900 dark:text-white">{loan.bookTitle}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{loan.copyNumber}</p>
+                    </td>
+                    <td className="px-4 py-4 text-gray-700 dark:text-gray-300">
+                      {loan.userName}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400">
+                      {new Date(loan.borrowedDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`text-sm ${loan.status === 'OVERDUE' ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
+                        {new Date(loan.dueDate).toLocaleDateString()}
+                      </span>
+                      {loan.daysOverdue > 0 && (
+                        <span className="block text-xs text-red-600 dark:text-red-400">
+                          {loan.daysOverdue} days overdue
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`badge ${
+                        loan.status === 'OVERDUE' ? 'badge-danger' :
+                        loan.status === 'RETURNED' ? 'badge-success' :
+                        'badge-warning'
+                      }`}>
+                        {getStatusIcon(loan.status)}
+                        {loan.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center text-gray-600 dark:text-gray-400">
+                      {loan.renewalCount || 0}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex gap-2">
+                        {(loan.status === 'ACTIVE' || loan.status === 'OVERDUE') && (
+                          <>
+                            {loan.canRenew && (
+                              <button
+                                onClick={() => handleRenew(loan.id)}
+                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                title="Renew"
+                              >
+                                <RefreshCw size={16} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleReturn(loan.id)}
+                              className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              title="Return"
+                            >
+                              <CheckCircle size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="btn-secondary">Previous</button>
-          <span className="px-4 py-2">Page {page + 1} of {totalPages}</span>
-          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} className="btn-secondary">Next</button>
-        </div>
-      )}
-
-      {/* Create Loan Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create New Loan</h2>
-            <form onSubmit={handleCreateLoan} className="space-y-4">
-              <div>
-                <label className="label">Member *</label>
-                <select value={formData.userId} onChange={(e) => setFormData({...formData, userId: e.target.value})} className="input" required>
-                  <option value="">Select member</option>
-                  {users.map(u => <option key={u.id} value={u.id}>{u.fullName} ({u.username})</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="label">Due Date</label>
-                <input type="date" value={formData.dueDate} onChange={(e) => setFormData({...formData, dueDate: e.target.value})} className="input" />
-              </div>
-              <p className="text-sm text-gray-500">Note: To complete loan creation, go to Books and select an available copy to lend.</p>
-              <div className="flex justify-end gap-2 pt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">Cancel</button>
-                <button type="submit" className="btn-primary">Create Loan</button>
-              </div>
-            </form>
-          </div>
+        <div className="flex justify-center items-center gap-2">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(p => p - 1)}
+            className="btn-secondary disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-600 dark:text-gray-400">
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => p + 1)}
+            className="btn-secondary disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
