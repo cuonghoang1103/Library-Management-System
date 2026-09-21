@@ -1,6 +1,6 @@
 # Library Management System
 
-A full-stack library management system built with **Spring Boot 3.2** (backend) and **React + Vite + TailwindCSS** (frontend).
+A full-stack library management system built with **Spring Boot 3.4 on Java 21** (backend) and **React + Vite + TailwindCSS** (frontend).
 
 ## Features
 
