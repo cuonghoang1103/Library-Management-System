@@ -5,9 +5,11 @@ import com.library.entity.User;
 import com.library.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test")   // khong seed du lieu demo khi chay test
 public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
