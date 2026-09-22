@@ -88,9 +88,12 @@ public class ReservationService {
     public ReservationDTO cancelReservation(Long reservationId, Long userId) {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        User caller = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Check the caller's role, not the owner's: the owner or a librarian may cancel
         if (!reservation.getUser().getId().equals(userId) &&
-            reservation.getUser().getRole() != Role.LIBRARIAN) {
+            caller.getRole() != Role.LIBRARIAN) {
             throw new BadRequestException("You can only cancel your own reservations");
         }
 
