@@ -8,6 +8,7 @@ import com.library.entity.User;
 import com.library.exception.BadRequestException;
 import com.library.exception.ResourceNotFoundException;
 import com.library.repository.FeeRepository;
+import com.library.repository.LoanRepository;
 import com.library.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,9 @@ class FeeServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private LoanRepository loanRepository;
 
     @InjectMocks
     private FeeService feeService;

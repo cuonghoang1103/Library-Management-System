@@ -24,10 +24,10 @@ public class LoanService {
     private final BookCopyRepository copyRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final FeeService feeService;
     
     private static final int DEFAULT_LOAN_DAYS = 14;
     private static final int MAX_RENEWALS = 2;
-    private static final long OVERDUE_FEE_PER_DAY = 1000; // 1000 VND per day
     
     public Page<LoanDTO> getAllLoans(Pageable pageable) {
         return loanRepository.findAll(pageable).map(this::toDTO);
@@ -127,7 +127,7 @@ public class LoanService {
         // Calculate overdue fee if applicable
         if (returnedDate.isAfter(loan.getDueDate())) {
             long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(loan.getDueDate(), returnedDate);
-            // Fee calculation would go here
+            feeService.createOverdueFee(loan, daysOverdue);
         }
         
         // A returned loan is always CLOSED; "returned late" is derived from returnedDate > dueDate
