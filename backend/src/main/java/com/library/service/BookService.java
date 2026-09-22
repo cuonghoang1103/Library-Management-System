@@ -11,6 +11,7 @@ import com.library.exception.ResourceNotFoundException;
 import com.library.repository.BookRepository;
 import com.library.repository.BookCopyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class BookService {
  private final AuditLogService auditLogService;
 
  private static final int DEFAULT_LOAN_DAYS = 14;
+ private static final String ISBN_EXISTS = "ISBN already exists";
     
     public Page<BookDTO> getAllBooks(Pageable pageable) {
         return bookRepository.findAll(pageable).map(this::toDTO);
@@ -62,7 +64,15 @@ public class BookService {
  .availableCopies(0)
  .build();
         
- book = bookRepository.save(book);
+        if (dto.getIsbn() != null && bookRepository.existsByIsbn(dto.getIsbn())) {
+            throw new BadRequestException(ISBN_EXISTS);
+        }
+        try {
+            book = bookRepository.save(book);
+        } catch (DataIntegrityViolationException e) {
+            // The same ISBN was inserted concurrently, after the check above
+            throw new BadRequestException(ISBN_EXISTS, e);
+        }
 
  auditLogService.logCreate(null, AuditLog.Entities.BOOK, book.getId(), toDTO(book), null);
 
@@ -89,6 +99,12 @@ public class BookService {
     public BookDTO updateBook(Long id, BookDTO dto) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+
+        // Changing the ISBN to one that another book already uses
+        if (dto.getIsbn() != null && !dto.getIsbn().equals(book.getIsbn())
+                && bookRepository.existsByIsbn(dto.getIsbn())) {
+            throw new BadRequestException(ISBN_EXISTS);
+        }
         
         book.setTitle(dto.getTitle());
         book.setDescription(dto.getDescription());
