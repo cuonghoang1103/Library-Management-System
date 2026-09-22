@@ -19,6 +19,8 @@ import java.util.Base64;
 public class DataLoader implements CommandLineRunner {
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String LIBRARIAN_USERNAME = "librarian";
+    private static final String MEMBER_USERNAME = "member";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -37,10 +39,10 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // Seed Librarian if not exists
-        if (!userRepository.existsByUsername("librarian")) {
+        if (!userRepository.existsByUsername(LIBRARIAN_USERNAME)) {
             User librarian = User.builder()
-                .username("librarian")
-                .password(passwordEncoder.encode(seedPassword("librarian", librarianPassword)))
+                .username(LIBRARIAN_USERNAME)
+                .password(passwordEncoder.encode(seedPassword(LIBRARIAN_USERNAME, librarianPassword)))
                 .fullName("Nguyen Van Librarian")
                 .email("librarian@library.com")
                 .phoneNumber("0901234567")
@@ -52,10 +54,10 @@ public class DataLoader implements CommandLineRunner {
         }
 
         // Seed Member if not exists
-        if (!userRepository.existsByUsername("member")) {
+        if (!userRepository.existsByUsername(MEMBER_USERNAME)) {
             User member = User.builder()
-                .username("member")
-                .password(passwordEncoder.encode(seedPassword("member", memberPassword)))
+                .username(MEMBER_USERNAME)
+                .password(passwordEncoder.encode(seedPassword(MEMBER_USERNAME, memberPassword)))
                 .fullName("John Doe")
                 .email("member@example.com")
                 .phoneNumber("0901111111")
