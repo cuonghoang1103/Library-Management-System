@@ -37,6 +37,10 @@ app:
   jwt:
     secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-signing-must-be-long-enough}
     expiration-ms: 86400000
+  seed:
+    # Demo account passwords - no default: if unset, DataLoader generates a random one
+    librarian-password: ${SEED_LIBRARIAN_PASSWORD:}
+    member-password: ${SEED_MEMBER_PASSWORD:}
 
 logging:
   level:
