@@ -46,7 +46,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewDTO createReview(Long userId, Long bookId, Integer rating, String comment) {
-        if (rating < 1 || rating > 5) {
+        if (rating == null || rating < 1 || rating > 5) {
             throw new BadRequestException("Rating must be between 1 and 5");
         }
 

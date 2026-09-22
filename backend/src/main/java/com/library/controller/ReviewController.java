@@ -3,6 +3,10 @@ package com.library.controller;
 import com.library.dto.ApiResponse;
 import com.library.dto.ReviewDTO;
 import com.library.service.ReviewService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,7 +42,7 @@ public class ReviewController {
     @PostMapping("/books/{bookId}/reviews")
     public ResponseEntity<ApiResponse<ReviewDTO>> createReview(
             @PathVariable Long bookId,
-            @RequestBody CreateReviewRequest request,
+            @Valid @RequestBody CreateReviewRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = extractUserId(userDetails);
         ReviewDTO review = reviewService.createReview(userId, bookId, request.rating(), request.comment());
@@ -70,7 +74,7 @@ public class ReviewController {
         return null;
     }
 
-    public record CreateReviewRequest(Integer rating, String comment) {}
+    public record CreateReviewRequest(@NotNull @Min(1) @Max(5) Integer rating, String comment) {}
     public record UpdateReviewRequest(Integer rating, String comment) {}
     public record ReviewStats(Double averageRating, Long count) {}
 }
