@@ -13,8 +13,8 @@ Tool dùng trong bài: **SonarQube** (quét mã tĩnh) · **Maven + JUnit** (`mv
 >
 > Slide mẫu 68 trang (tiếng Anh): xem từng slide ở bài **Lab 2.5.6** của môn SWT301 trên
 > cuongthai.com, hoặc tải thẳng
-> [.pptx](https://media.cuongthai.com/files/academy/SWT301/v1/SWT301-Lab2.5-Sample-Slides-Library-Management-System.pptx) ·
-> [.pdf](https://media.cuongthai.com/files/academy/SWT301/v1/SWT301-Lab2.5-Sample-Slides-Library-Management-System.pdf).
+> [.pptx](https://media.cuongthai.com/files/academy/SWT301/v2/SWT301-Lab2.5-Sample-Slides-Library-Management-System.pptx) ·
+> [.pdf](https://media.cuongthai.com/files/academy/SWT301/v2/SWT301-Lab2.5-Sample-Slides-Library-Management-System.pdf).
 
 ---
 
