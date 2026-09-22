@@ -108,6 +108,10 @@ public class BookService {
  public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+        // The delete cascades to the copies and their loans, so a book on loan must not be deleted
+        if (book.getCopies().stream().anyMatch(BookCopy::isOnLoan)) {
+            throw new BadRequestException("Cannot delete a book while a copy is on loan");
+        }
         bookRepository.delete(book);
     }
     

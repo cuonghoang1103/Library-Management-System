@@ -56,4 +56,12 @@ public class BookCopy {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    /**
+     * A copy is on loan while its status is LOANED or it still has an ACTIVE/OVERDUE loan.
+     */
+    public boolean isOnLoan() {
+        return status == CopyStatus.LOANED || loans.stream()
+            .anyMatch(loan -> loan.getStatus() == LoanStatus.ACTIVE || loan.getStatus() == LoanStatus.OVERDUE);
+    }
 }
