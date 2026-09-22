@@ -29,9 +29,6 @@ public class LoanService {
     private final ReservationService reservationService;
     private final NotificationService notificationService;
     
-    private static final int DEFAULT_LOAN_DAYS = 14;
-    private static final int MAX_RENEWALS = 2;
-    
     public Page<LoanDTO> getAllLoans(Pageable pageable) {
         return loanRepository.findAll(pageable).map(this::toDTO);
     }
@@ -89,7 +86,7 @@ public class LoanService {
         
         LocalDate borrowedDate = LocalDate.now();
         LocalDate dueDate = request.getDueDate() != null ? 
-                request.getDueDate() : borrowedDate.plusDays(DEFAULT_LOAN_DAYS);
+                request.getDueDate() : borrowedDate.plusDays(settingsService.getDefaultLoanDays());
         
         // Atomic: update copy status + create loan in one transaction
         copy.setStatus(CopyStatus.LOANED);
@@ -167,9 +164,10 @@ public class LoanService {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
         
-        if (!loan.canRenew(MAX_RENEWALS)) {
-            if (loan.getRenewalCount() >= MAX_RENEWALS) {
-                throw new BadRequestException("Maximum renewal limit reached (" + MAX_RENEWALS + ")");
+        int maxRenewals = settingsService.getMaxRenewals();
+        if (!loan.canRenew(maxRenewals)) {
+            if (loan.getRenewalCount() >= maxRenewals) {
+                throw new BadRequestException("Maximum renewal limit reached (" + maxRenewals + ")");
             }
             if (loan.isOverdue()) {
                 throw new BadRequestException("Cannot renew overdue loan. Please return and pay any fees.");
@@ -178,7 +176,7 @@ public class LoanService {
         }
         
         loan.setRenewalCount(loan.getRenewalCount() + 1);
-        loan.setDueDate(loan.getDueDate().plusDays(DEFAULT_LOAN_DAYS));
+        loan.setDueDate(loan.getDueDate().plusDays(settingsService.getDefaultLoanDays()));
         
         return toDTO(loanRepository.save(loan));
     }
@@ -232,7 +230,7 @@ public class LoanService {
  checkBorrowLimit(user);
 
  LocalDate borrowedDate = LocalDate.now();
- LocalDate dueDate = borrowedDate.plusDays(DEFAULT_LOAN_DAYS);
+ LocalDate dueDate = borrowedDate.plusDays(settingsService.getDefaultLoanDays());
 
  // Update copy status
  copy.setStatus(CopyStatus.LOANED);
@@ -269,7 +267,7 @@ public class LoanService {
     }
 
  private LoanDTO toDTO(Loan loan) {
-        boolean canRenew = loan.canRenew(MAX_RENEWALS);
+        boolean canRenew = loan.canRenew(settingsService.getMaxRenewals());
         return LoanDTO.builder()
                 .id(loan.getId())
                 .userId(loan.getUser().getId())

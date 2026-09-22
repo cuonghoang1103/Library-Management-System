@@ -19,5 +19,5 @@ public class CreateLoanRequest {
     @NotNull(message = "Copy ID is required")
     private Long copyId;
 
-    private LocalDate dueDate; // Optional, defaults to 14 days from now
+    private LocalDate dueDate; // Optional, defaults to the loan period in Settings (default_loan_days)
 }

@@ -71,6 +71,8 @@ class LoanServiceTest {
     void setUp() {
         // Library settings at their default values
         lenient().when(settingsService.getMaxLoansPerUser()).thenReturn(5);
+        lenient().when(settingsService.getDefaultLoanDays()).thenReturn(14);
+        lenient().when(settingsService.getMaxRenewals()).thenReturn(2);
 
         testUser = User.builder()
                 .id(1L)

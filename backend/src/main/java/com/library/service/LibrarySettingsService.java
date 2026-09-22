@@ -64,7 +64,11 @@ public class LibrarySettingsService {
     }
     
     public String getSetting(String key) {
-        return settingsCache.getOrDefault(key, null);
+        // Not in the startup cache (not loaded yet, or added later): read the saved value
+        String value = settingsCache.get(key);
+        return value != null ? value : settingsRepository.findBySettingKey(key)
+                .map(LibrarySettings::getSettingValue)
+                .orElse(null);
     }
     
     public int getIntSetting(String key, int defaultValue) {
