@@ -196,8 +196,8 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("Should use default password when not provided")
-        void shouldUseDefaultPasswordWhenNotProvided() {
+        @DisplayName("Should reject registration when password is not provided")
+        void shouldRejectRegistrationWhenPasswordNotProvided() {
             UserDTO newUserDTO = UserDTO.builder()
                     .username("new_user")
                     .fullName("New User")
@@ -207,16 +207,11 @@ class AuthServiceTest {
 
             when(userRepository.existsByUsername("new_user")).thenReturn(false);
             when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-            when(passwordEncoder.encode("password123")).thenReturn("encodedDefaultPassword");
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                User user = invocation.getArgument(0);
-                user.setId(2L);
-                return user;
-            });
 
-            authService.register(newUserDTO);
-
-            verify(passwordEncoder, times(1)).encode("password123");
+            assertThatThrownBy(() -> authService.register(newUserDTO))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("Password is required");
+            verify(userRepository, never()).save(any(User.class));
         }
 
         @Test

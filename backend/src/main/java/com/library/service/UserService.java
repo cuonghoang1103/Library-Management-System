@@ -43,10 +43,13 @@ public class UserService {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new BadRequestException("Email already exists");
         }
+        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+            throw new BadRequestException("Password is required");
+        }
         
         User user = User.builder()
                 .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword() != null ? dto.getPassword() : "password123"))
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .fullName(dto.getFullName())
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())

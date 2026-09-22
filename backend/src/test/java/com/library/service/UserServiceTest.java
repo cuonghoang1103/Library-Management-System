@@ -60,6 +60,7 @@ class UserServiceTest {
 
         testUserDTO = UserDTO.builder()
                 .username("john_doe")
+                .password("secret123")
                 .fullName("John Doe")
                 .email("john@example.com")
                 .phoneNumber("1234567890")
