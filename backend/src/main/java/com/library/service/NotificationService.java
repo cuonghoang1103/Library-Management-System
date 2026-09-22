@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional   // class-level: the notify...() methods are transactional too (a this-call skips the proxy)
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -19,7 +20,6 @@ public class NotificationService {
     /**
      * Create a notification for a user
      */
-    @Transactional
     public Notification createNotification(Long userId, String title, String message, 
             Notification.NotificationType type, Long relatedId) {
         User user = userRepository.findById(userId).orElse(null);
@@ -54,7 +54,6 @@ public class NotificationService {
     /**
      * Mark notification as read
      */
-    @Transactional
     public void markAsRead(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(n -> {
             n.setRead(true);
@@ -65,7 +64,6 @@ public class NotificationService {
     /**
      * Mark all notifications as read for a user
      */
-    @Transactional
     public void markAllAsRead(Long userId) {
         List<Notification> unread = notificationRepository.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId);
         unread.forEach(n -> n.setRead(true));
