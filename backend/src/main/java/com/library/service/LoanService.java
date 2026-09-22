@@ -26,6 +26,7 @@ public class LoanService {
     private final UserRepository userRepository;
     private final FeeService feeService;
     private final LibrarySettingsService settingsService;
+    private final ReservationService reservationService;
     
     private static final int DEFAULT_LOAN_DAYS = 14;
     private static final int MAX_RENEWALS = 2;
@@ -147,6 +148,9 @@ public class LoanService {
         Book book = copy.getBook();
         book.setAvailableCopies(book.getAvailableCopies() + 1);
         bookRepository.save(book);
+
+        // The copy is back on the shelf: the first waiting reservation becomes READY
+        reservationService.checkAndNotifyReadyReservations(book.getId());
         
         return toDTO(loan);
     }

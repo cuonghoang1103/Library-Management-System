@@ -53,6 +53,9 @@ class LoanServiceTest {
     @Mock
     private LibrarySettingsService settingsService;
 
+    @Mock
+    private ReservationService reservationService;
+
     @InjectMocks
     private LoanService loanService;
 

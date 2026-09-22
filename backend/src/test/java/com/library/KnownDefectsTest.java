@@ -98,7 +98,8 @@ class KnownDefectsTest {
     private LoanService loanService() {
         return new LoanService(loanRepository, copyRepository, bookRepository, userRepository,
                 new FeeService(feeRepository, userRepository, loanRepository),
-                new LibrarySettingsService(settingsRepository));
+                new LibrarySettingsService(settingsRepository),
+                new ReservationService(reservationRepository, bookRepository, userRepository, copyRepository));
     }
 
     /** A loan that is 3 days overdue and not returned yet. */
