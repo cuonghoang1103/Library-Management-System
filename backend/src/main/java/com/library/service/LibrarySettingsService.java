@@ -34,6 +34,7 @@ public class LibrarySettingsService {
         // Loan settings
         saveSetting(LibrarySettings.Keys.DEFAULT_LOAN_DAYS, "14", "Default loan duration in days", "LOAN");
         saveSetting(LibrarySettings.Keys.MAX_RENEWALS, "2", "Maximum number of renewals per loan", "LOAN");
+        saveSetting(LibrarySettings.Keys.MAX_LOANS_PER_USER, "5", "Maximum books a member can borrow at the same time", "LOAN");
         saveSetting(LibrarySettings.Keys.OVERDUE_FEE_PER_DAY, "1000", "Overdue fee per day (VND)", "FEE");
         saveSetting(LibrarySettings.Keys.MAX_RESERVATIONS_PER_USER, "3", "Maximum reservations per user", "RESERVATION");
         saveSetting(LibrarySettings.Keys.RESERVATION_EXPIRY_DAYS, "7", "Days before reservation expires", "RESERVATION");
@@ -119,6 +120,10 @@ public class LibrarySettingsService {
         return getIntSetting(LibrarySettings.Keys.MAX_RENEWALS, 2);
     }
     
+    public int getMaxLoansPerUser() {
+        return getIntSetting(LibrarySettings.Keys.MAX_LOANS_PER_USER, 5);
+    }
+
     public BigDecimal getOverdueFeePerDay() {
         return getDecimalSetting(LibrarySettings.Keys.OVERDUE_FEE_PER_DAY, new BigDecimal("1000"));
     }

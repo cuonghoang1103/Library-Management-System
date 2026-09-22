@@ -50,6 +50,9 @@ class LoanServiceTest {
     @Mock
     private FeeService feeService;
 
+    @Mock
+    private LibrarySettingsService settingsService;
+
     @InjectMocks
     private LoanService loanService;
 
@@ -60,6 +63,9 @@ class LoanServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Library settings at their default values
+        lenient().when(settingsService.getMaxLoansPerUser()).thenReturn(5);
+
         testUser = User.builder()
                 .id(1L)
                 .username("john_doe")

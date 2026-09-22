@@ -33,6 +33,7 @@ public class LibrarySettings {
         // Loan settings
         public static final String DEFAULT_LOAN_DAYS = "default_loan_days";
         public static final String MAX_RENEWALS = "max_renewals";
+        public static final String MAX_LOANS_PER_USER = "max_loans_per_user";
         public static final String OVERDUE_FEE_PER_DAY = "overdue_fee_per_day";
         public static final String MAX_RESERVATIONS_PER_USER = "max_reservations_per_user";
         public static final String RESERVATION_EXPIRY_DAYS = "reservation_expiry_days";

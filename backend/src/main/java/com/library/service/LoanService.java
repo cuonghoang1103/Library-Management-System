@@ -25,6 +25,7 @@ public class LoanService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final FeeService feeService;
+    private final LibrarySettingsService settingsService;
     
     private static final int DEFAULT_LOAN_DAYS = 14;
     private static final int MAX_RENEWALS = 2;
@@ -81,6 +82,8 @@ public class LoanService {
         if (user.getRole() != Role.MEMBER) {
             throw new BadRequestException("Only members can borrow books");
         }
+
+        checkBorrowLimit(user);
         
         LocalDate borrowedDate = LocalDate.now();
         LocalDate dueDate = request.getDueDate() != null ? 
@@ -218,6 +221,8 @@ public class LoanService {
  throw new BadRequestException("Only members can borrow books");
  }
 
+ checkBorrowLimit(user);
+
  LocalDate borrowedDate = LocalDate.now();
  LocalDate dueDate = borrowedDate.plusDays(DEFAULT_LOAN_DAYS);
 
@@ -242,6 +247,16 @@ public class LoanService {
 
  return toDTO(loanRepository.save(loan));
  }
+
+    /**
+     * Rejects a new loan when the member already holds the maximum number of books (Settings).
+     */
+    private void checkBorrowLimit(User user) {
+        int maxLoans = settingsService.getMaxLoansPerUser();
+        if (loanRepository.countActiveLoansByUserId(user.getId()) >= maxLoans) {
+            throw new BadRequestException("Borrow limit reached (" + maxLoans + " books)");
+        }
+    }
 
  private LoanDTO toDTO(Loan loan) {
         boolean canRenew = loan.canRenew(MAX_RENEWALS);
