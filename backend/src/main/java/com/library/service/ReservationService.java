@@ -20,6 +20,7 @@ public class ReservationService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final BookCopyRepository copyRepository;
+    private final NotificationService notificationService;
 
     /**
      * Create a new reservation
@@ -128,6 +129,8 @@ public class ReservationService {
         firstReservation.setExpiresAt(LocalDateTime.now().plusDays(3)); // 3 days to pick up
         
         reservationRepository.save(firstReservation);
+        notificationService.notifyReservationReady(
+            firstReservation.getUser().getId(), firstReservation.getBook().getTitle());
         
         return List.of(ReservationDTO.fromEntity(firstReservation));
     }

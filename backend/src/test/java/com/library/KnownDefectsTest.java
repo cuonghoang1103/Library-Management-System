@@ -96,10 +96,13 @@ class KnownDefectsTest {
     }
 
     private LoanService loanService() {
+        NotificationService notificationService = new NotificationService(notificationRepository, userRepository);
         return new LoanService(loanRepository, copyRepository, bookRepository, userRepository,
                 new FeeService(feeRepository, userRepository, loanRepository),
                 new LibrarySettingsService(settingsRepository),
-                new ReservationService(reservationRepository, bookRepository, userRepository, copyRepository));
+                new ReservationService(reservationRepository, bookRepository, userRepository, copyRepository,
+                        notificationService),
+                notificationService);
     }
 
     /** A loan that is 3 days overdue and not returned yet. */
@@ -272,7 +275,8 @@ class KnownDefectsTest {
         @Test
         @DisplayName("A librarian can cancel a member's reservation")
         void librarianCanCancelMemberReservation() {
-            ReservationService rs = new ReservationService(reservationRepository, bookRepository, userRepository, copyRepository);
+            ReservationService rs = new ReservationService(reservationRepository, bookRepository, userRepository, copyRepository,
+                    new NotificationService(notificationRepository, userRepository));
             Reservation membersReservation = Reservation.builder().id(10L).user(member(1L)).book(book())
                     .status(Reservation.ReservationStatus.WAITING).reservedAt(LocalDateTime.now()).build();
             when(reservationRepository.findById(10L)).thenReturn(Optional.of(membersReservation));

@@ -27,6 +27,7 @@ public class LoanService {
     private final FeeService feeService;
     private final LibrarySettingsService settingsService;
     private final ReservationService reservationService;
+    private final NotificationService notificationService;
     
     private static final int DEFAULT_LOAN_DAYS = 14;
     private static final int MAX_RENEWALS = 2;
@@ -108,7 +109,9 @@ public class LoanService {
                 .renewalCount(0)
                 .build();
         
-        return toDTO(loanRepository.save(loan));
+        loan = loanRepository.save(loan);
+        notificationService.notifyLoanCreated(user.getId(), book.getTitle());
+        return toDTO(loan);
     }
     
     /**
@@ -152,6 +155,7 @@ public class LoanService {
         // The copy is back on the shelf: the first waiting reservation becomes READY
         reservationService.checkAndNotifyReadyReservations(book.getId());
         
+        notificationService.notifyLoanReturned(loan.getUser().getId(), book.getTitle());
         return toDTO(loan);
     }
     
@@ -249,7 +253,9 @@ public class LoanService {
  .renewalCount(0)
  .build();
 
- return toDTO(loanRepository.save(loan));
+ loan = loanRepository.save(loan);
+ notificationService.notifyLoanCreated(user.getId(), book.getTitle());
+ return toDTO(loan);
  }
 
     /**
