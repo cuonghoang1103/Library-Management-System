@@ -109,7 +109,7 @@ public class LoanService {
     
     /**
      * Return a book - atomic operation that:
-     * 1. Updates loan status to RETURNED
+     * 1. Closes the loan (status CLOSED), whether it is returned on time or late
      * 2. Sets returned_date
      * 3. Changes copy status back to ON_SHELF
      */
@@ -127,13 +127,12 @@ public class LoanService {
         // Calculate overdue fee if applicable
         if (returnedDate.isAfter(loan.getDueDate())) {
             long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(loan.getDueDate(), returnedDate);
-            loan.setStatus(LoanStatus.OVERDUE);
             // Fee calculation would go here
-        } else {
-            loan.setStatus(LoanStatus.RETURNED);
         }
         
+        // A returned loan is always CLOSED; "returned late" is derived from returnedDate > dueDate
         loan.setReturnedDate(returnedDate);
+        loan.setStatus(LoanStatus.CLOSED);
         loan = loanRepository.save(loan);
         
         // Atomic: release copy back to shelf
@@ -145,12 +144,6 @@ public class LoanService {
         Book book = copy.getBook();
         book.setAvailableCopies(book.getAvailableCopies() + 1);
         bookRepository.save(book);
-        
-        // Auto-close loan if no fees
-        if (loan.getStatus() != LoanStatus.OVERDUE) {
-            loan.setStatus(LoanStatus.CLOSED);
-            loan = loanRepository.save(loan);
-        }
         
         return toDTO(loan);
     }

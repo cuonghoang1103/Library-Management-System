@@ -263,21 +263,17 @@ class LoanServiceTest {
         }
 
         @Test
-        @DisplayName("Should mark as OVERDUE when returned late")
-        void shouldMarkAsOverdueWhenReturnedLate() {
+        @DisplayName("Should close the loan when returned late")
+        void shouldCloseLoanWhenReturnedLate() {
             testLoan.setDueDate(LocalDate.now().minusDays(1)); // Overdue
             when(loanRepository.findById(1L)).thenReturn(Optional.of(testLoan));
-            when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> {
-                Loan loan = invocation.getArgument(0);
-                loan.setStatus(LoanStatus.OVERDUE);
-                return loan;
-            });
+            when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(copyRepository.save(any(BookCopy.class))).thenReturn(testCopy);
             when(bookRepository.save(any(Book.class))).thenReturn(testBook);
 
             LoanDTO result = loanService.returnBook(1L);
 
-            assertThat(result.getStatus()).isEqualTo(LoanStatus.OVERDUE);
+            assertThat(result.getStatus()).isEqualTo(LoanStatus.CLOSED);
         }
 
         @Test
