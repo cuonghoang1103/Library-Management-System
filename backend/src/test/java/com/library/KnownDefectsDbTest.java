@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 @Tag("known-defect")
 @DataJpaTest
 @ActiveProfiles("test")
-@DisplayName("Known defects - database level (currently RED)")
+@DisplayName("Known defects - database level (fixed - regression tests)")
 class KnownDefectsDbTest {
 
     @Autowired private BookRepository bookRepository;

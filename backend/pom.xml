@@ -21,10 +21,6 @@
  <java.version>21</java.version>
  <jjwt.version>0.12.3</jjwt.version>
  <lombok.version>1.18.40</lombok.version>
- <!-- SWT301: tests of the correct behaviour for known defects (KnownDefectsTest, KnownDefectsDbTest)
-      stay RED until the defects are fixed, so a plain mvn test skips them.
-      Run them with: mvn test -Dgroups=known-defect -DexcludedGroups= -->
- <excludedGroups>known-defect</excludedGroups>
  </properties>
 
     <dependencies>

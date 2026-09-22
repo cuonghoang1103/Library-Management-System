@@ -62,7 +62,7 @@ import static org.mockito.Mockito.when;
 @Tag("known-defect")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@DisplayName("Known defects - tests of the CORRECT behaviour (currently RED)")
+@DisplayName("Known defects - tests of the CORRECT behaviour (fixed - regression tests)")
 class KnownDefectsTest {
 
     @Mock private BookRepository bookRepository;
