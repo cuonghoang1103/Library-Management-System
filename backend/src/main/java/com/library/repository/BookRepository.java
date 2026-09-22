@@ -17,6 +17,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         WHERE to_tsvector('english',
         coalesce(title, '') || ' ' ||
         coalesce(author, '') || ' ' ||
+        coalesce(isbn, '') || ' ' ||
         coalesce(description, '') || ' ' ||
         coalesce(genre, '')
         ) @@ plainto_tsquery('english', :query)
@@ -26,6 +27,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         WHERE to_tsvector('english',
         coalesce(title, '') || ' ' ||
         coalesce(author, '') || ' ' ||
+        coalesce(isbn, '') || ' ' ||
         coalesce(description, '') || ' ' ||
         coalesce(genre, '')
         ) @@ plainto_tsquery('english', :query)
@@ -37,6 +39,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b FROM Book b WHERE " +
            "LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(b.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(b.genre) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Book> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
